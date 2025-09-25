@@ -69,4 +69,17 @@ class Horario:
                     if aux != None:
                         cls.salvar()
 
+        @classmethod
+
+        def atualizar(cls, obj):
+            aux = cls.listar_id(obj.get_id())
+            if aux != None:
+                cls.__objetos.remove(aux)
+                cls.salvar()
         
+        @classmethod
+        def abrir(cls):
+            cls.__objetos = []
+            try:
+                with open("horarios.json", mode ="r") as arquivo:
+                    list_dic= json.load(arquivo)
