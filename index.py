@@ -1,21 +1,28 @@
 from templates.manterclienteUI import ManterClienteUI
 from templates.manterservicoUI import ManterServicoUI
 from templates.manterhorarioUI import ManterHorarioUI
+from templates.manterprofissionalUI import ManterProfissionalUI
 import streamlit as st
 
 class IndexUI:
+
     @staticmethod
     def menu_admin():
-        op = st.sidebar.selectbox(
-            "Menu", 
-            ["Cadastro de Clientes", "Cadastro de Serviços", "Cadastro de Horários"]
-        )
+        op = st.sidebar.selectbox("Menu", [
+            "Cadastro de Clientes",
+            "Cadastro de Serviços",
+            "Cadastro de Horários",
+            "Cadastro de Profissionais"
+        ])
+
         if op == "Cadastro de Clientes":
             ManterClienteUI.main()
-        if op == "Cadastro de Serviços":
+        elif op == "Cadastro de Serviços":
             ManterServicoUI.main()
-        if op == "Cadastro de Horários":
+        elif op == "Cadastro de Horários":
             ManterHorarioUI.main()
+        elif op == "Cadastro de Profissionais":
+            ManterProfissionalUI.main()
 
     @staticmethod
     def sidebar():
@@ -25,5 +32,5 @@ class IndexUI:
     def main():
         IndexUI.sidebar()
 
-
-IndexUI.main()
+if __name__ == "__main__":
+    IndexUI.main()
