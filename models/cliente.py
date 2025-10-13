@@ -99,4 +99,4 @@ class ClienteDAO:
     def salvar(cls):
         with open("clientes.json", mode="w", encoding="utf-8") as arquivo:
             json.dump([c.to_json() for c in cls.objetos], arquivo, ensure_ascii=False, indent=4)
-
+                                                                

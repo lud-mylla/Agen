@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import time
-from view import View
+from views import View
 
 class ManterProfissionalUI:
     @staticmethod
@@ -31,13 +31,13 @@ class ManterProfissionalUI:
         nome = st.text_input("Informe o nome")
         email = st.text_input("Informe o e-mail")
         especialidade = st.text_input("Informe a especialidade")
-        conselho = st.text_input("Informe o conselho")
+        conselho = st.text_input("Informe a conselho")
         senha = st.text_input("Informe a senha", type="password")
         if st.button("Inserir"):
             View.profissional_inserir(nome, email, especialidade, conselho, senha)
             st.success("Profissional inserido com sucesso")
             time.sleep(1)
-            return
+            st.rerun()
 
     @staticmethod
     def atualizar():
@@ -54,7 +54,6 @@ class ManterProfissionalUI:
         if st.button("Atualizar"):
             View.profissional_atualizar(op.get_id(), nome, email, especialidade, conselho, senha)
             st.success("Profissional atualizado com sucesso")
-            return
 
     @staticmethod
     def excluir():
@@ -67,4 +66,6 @@ class ManterProfissionalUI:
             View.profissional_excluir(op.get_id())
             st.success("Profissional excluído com sucesso")
             time.sleep(1)
-            return
+            st.rerun()
+
+

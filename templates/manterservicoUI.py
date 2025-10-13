@@ -29,7 +29,7 @@ class ManterServicoUI:
     @staticmethod
     def inserir():
         descricao = st.text_input("Informe a descrição")
-        valor = st.text_input("Informe o valor (ex: 99,99)")
+        valor = st.text_input("Informe o valor)")
         if st.button("Inserir"):
             try:
                 valor_float = float(valor.replace(",", "."))
