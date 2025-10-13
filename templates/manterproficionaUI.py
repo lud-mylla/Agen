@@ -1,14 +1,13 @@
 import streamlit as st
-from datetime import datetime
-
-from view import View  # Certifique-se que a View tem os métodos para Profissional
+import pandas as pd
+import time
+from view import View
 
 class ManterProfissionalUI:
     @staticmethod
     def main():
         st.header("Cadastro de Profissionais")
         tab1, tab2, tab3, tab4 = st.tabs(["Listar", "Inserir", "Atualizar", "Excluir"])
-
         with tab1:
             ManterProfissionalUI.listar()
         with tab2:
@@ -22,70 +21,50 @@ class ManterProfissionalUI:
     def listar():
         profissionais = View.profissional_listar()
         if not profissionais:
-            st.write("Nenhum profissional cadastrado.")
+            st.info("Nenhum profissional cadastrado")
             return
-
-        for prof in profissionais:
-            st.markdown(f"## Profissional ID: {prof.get_id()}")
-            st.write("Nome:", prof.get_nome())
-            st.write("Email:", prof.get_email())
-            st.write("Telefone:", prof.get_fone())
-            st.markdown("---")
+        df = pd.DataFrame([p.to_json() for p in profissionais])
+        st.dataframe(df)
 
     @staticmethod
     def inserir():
-        nome = st.text_input("Nome do profissional")
-        email = st.text_input("Email")
-        fone = st.text_input("Telefone")
-
+        nome = st.text_input("Informe o nome")
+        email = st.text_input("Informe o e-mail")
+        especialidade = st.text_input("Informe a especialidade")
+        conselho = st.text_input("Informe o conselho")
+        senha = st.text_input("Informe a senha", type="password")
         if st.button("Inserir"):
-            if not nome.strip():
-                st.error("Nome é obrigatório.")
-                return
-            View.profissional_inserir(nome, email, fone)
-            st.success("Profissional inserido com sucesso.")
+            View.profissional_inserir(nome, email, especialidade, conselho, senha)
+            st.success("Profissional inserido com sucesso")
+            time.sleep(1)
+            return
 
     @staticmethod
     def atualizar():
         profissionais = View.profissional_listar()
         if not profissionais:
-            st.write("Nenhum profissional cadastrado.")
+            st.info("Nenhum profissional cadastrado")
             return
-
-        op = st.selectbox(
-            "Selecione um profissional para atualizar",
-            profissionais,
-            format_func=lambda p: f"{p.get_id()} - {p.get_nome()}"
-        )
-
+        op = st.selectbox("Selecione um profissional", profissionais, format_func=lambda p: p.get_nome())
         nome = st.text_input("Novo nome", op.get_nome())
-        email = st.text_input("Novo email", op.get_email())
-        fone = st.text_input("Novo telefone", op.get_fone())
-
+        email = st.text_input("Novo e-mail", op.get_email())
+        especialidade = st.text_input("Nova especialidade", op.get_especialidade())
+        conselho = st.text_input("Novo conselho", op.get_conselho())
+        senha = st.text_input("Nova senha", op.get_senha(), type="password")
         if st.button("Atualizar"):
-            if not nome.strip():
-                st.error("Nome é obrigatório.")
-                return
-            View.profissional_atualizar(op.get_id(), nome, email, fone)
-            st.success("Profissional atualizado com sucesso.")
+            View.profissional_atualizar(op.get_id(), nome, email, especialidade, conselho, senha)
+            st.success("Profissional atualizado com sucesso")
+            return
 
     @staticmethod
     def excluir():
         profissionais = View.profissional_listar()
         if not profissionais:
-            st.write("Nenhum profissional cadastrado.")
+            st.info("Nenhum profissional cadastrado")
             return
-
-        op = st.selectbox(
-            "Selecione um profissional para excluir",
-            profissionais,
-            format_func=lambda p: f"{p.get_id()} - {p.get_nome()}"
-        )
-
+        op = st.selectbox("Selecione um profissional para excluir", profissionais, format_func=lambda p: p.get_nome())
         if st.button("Excluir"):
             View.profissional_excluir(op.get_id())
-            st.success("Profissional excluído com sucesso.")
-            # Opcional: pausa para mostrar mensagem e recarregar
-            import time
-            time.sleep(2)
-            st.experimental_rerun()
+            st.success("Profissional excluído com sucesso")
+            time.sleep(1)
+            return
