@@ -1,4 +1,3 @@
-
 import json
 from datetime import datetime
 
@@ -106,12 +105,5 @@ class HorarioDAO:
     @classmethod
     def salvar(cls):
         with open("horarios.json", mode="w", encoding="utf-8") as arquivo:
-            json.dump(
-                [h.to_json() for h in cls.objetos],
-                arquivo,
-                ensure_ascii=False,
-                indent=4
-            )
-
-
+            json.dump([h.to_json() for h in cls.objetos], arquivo, ensure_ascii=False, indent=4)
                 

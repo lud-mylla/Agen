@@ -1,9 +1,14 @@
+
+ADMIN_SENHA = "1234"
+
 from models.cliente import Cliente, ClienteDAO
 from models.profissional import Profissional, ProfissionalDAO
 from models.servico import Servico, ServicoDAO
 from models.horario import Horario, HorarioDAO
 
+
 class View:
+    
     @staticmethod
     def cliente_inserir(nome, email, fone, senha):
         c = Cliente(0, nome, email, fone, senha)
@@ -28,6 +33,18 @@ class View:
         ClienteDAO.excluir(c)
 
     @staticmethod
+    def cliente_autenticar(email, senha):
+        for c in ClienteDAO.listar():
+            if c.get_email() == email and c.get_senha() == senha:
+                return {"id": c.get_id(), "nome": c.get_nome(), "tipo": "cliente"}
+
+        if email == "admin" and senha == ADMIN_SENHA:
+            return {"id": 0, "nome": "Administrador", "tipo": "admin"}
+
+        return None
+
+    
+    @staticmethod
     def profissional_inserir(nome, email, especialidade, conselho, senha):
         p = Profissional(0, nome, email, especialidade, conselho, senha)
         ProfissionalDAO.inserir(p)
@@ -51,6 +68,14 @@ class View:
         ProfissionalDAO.excluir(p)
 
     @staticmethod
+    def profissional_autenticar(email, senha):
+        for p in ProfissionalDAO.listar():
+            if p.get_email() == email and p.get_senha() == senha:
+                return {"id": p.get_id(), "nome": p.get_nome(), "tipo": "profissional"}
+        return None
+
+    
+    @staticmethod
     def servico_inserir(descricao, valor):
         s = Servico(0, descricao, valor)
         ServicoDAO.inserir(s)
@@ -73,6 +98,7 @@ class View:
         s = Servico(id, "", 0)
         ServicoDAO.excluir(s)
 
+    
     @staticmethod
     def horario_inserir(data, confirmado, id_cliente, id_servico, id_profissional):
         h = Horario(0, data)
@@ -105,18 +131,14 @@ class View:
         if h is not None:
             HorarioDAO.excluir(h)
 
+   
     @staticmethod
-    def cliente_autenticar(email, senha):
-        for c in ClienteDAO.listar():
-            if c.get_email() == email and c.get_senha() == senha:
-                return {"id": c.get_id(), "nome": c.get_nome(), "tipo": "cliente"}
-        if email == "admin" and senha == "1234":
-            return {"id": 0, "nome": "Administrador", "tipo": "admin"}
-        return None
+    def admin_get():
+        """Retorna os dados do admin"""
+        return {"id": 0, "nome": "Administrador", "email": "admin", "senha": ADMIN_SENHA}
 
     @staticmethod
-    def profissional_autenticar(email, senha):
-        for p in ProfissionalDAO.listar():
-            if p.get_email() == email and p.get_senha() == senha:
-                return {"id": p.get_id(), "nome": p.get_nome(), "tipo": "profissional"}
-        return None
+    def admin_atualizar(nova_senha):
+        """Atualiza a senha do admin"""
+        global ADMIN_SENHA
+        ADMIN_SENHA = nova_senha

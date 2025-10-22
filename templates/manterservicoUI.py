@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import time
-from views import View
+from view import View
 
 class ManterServicoUI:
     @staticmethod
@@ -29,12 +29,13 @@ class ManterServicoUI:
     @staticmethod
     def inserir():
         descricao = st.text_input("Informe a descrição")
-        valor = st.text_input("Informe o valor)")
+        valor = st.text_input("Informe o valor (ex: 99,99)")
+
         if st.button("Inserir"):
             try:
                 valor_float = float(valor.replace(",", "."))
                 View.servico_inserir(descricao, valor_float)
-                st.success("Serviço inserido com sucesso!")
+                st.success("Serviço inserido com sucesso")
                 time.sleep(1)
                 st.rerun()
             except ValueError:
@@ -46,14 +47,16 @@ class ManterServicoUI:
         if not servicos:
             st.info("Nenhum serviço cadastrado")
             return
+
         op = st.selectbox("Selecione um serviço", servicos, format_func=lambda s: s.get_descricao())
         descricao = st.text_input("Nova descrição", op.get_descricao())
         valor = st.text_input("Novo valor", str(op.get_valor()).replace(".", ","))
+
         if st.button("Atualizar"):
             try:
                 valor_float = float(valor.replace(",", "."))
                 View.servico_atualizar(op.get_id(), descricao, valor_float)
-                st.success("Serviço atualizado com sucesso!")
+                st.success("Serviço atualizado com sucesso")
             except ValueError:
                 st.error("Valor inválido")
 
@@ -61,11 +64,12 @@ class ManterServicoUI:
     def excluir():
         servicos = View.servico_listar()
         if not servicos:
-            st.info("Nenhum serviço foi cadastrado")
+            st.info("Nenhum serviço cadastrado")
             return
-        op = st.selectbox("Selecione serviço para excluir", servicos, format_func=lambda s: s.get_descricao())
+
+        op = st.selectbox("Selecione um serviço para excluir", servicos, format_func=lambda s: s.get_descricao())
         if st.button("Excluir"):
             View.servico_excluir(op.get_id())
-            st.success("Serviço excluído")
+            st.success("Serviço excluído com sucesso")
             time.sleep(1)
             st.rerun()

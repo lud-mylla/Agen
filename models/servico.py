@@ -15,19 +15,11 @@ class Servico:
     def set_valor(self, valor): self.__valor = valor
 
     def to_json(self):
-        return {
-            "id": self.__id,
-            "descricao": self.__descricao,
-            "valor": self.__valor
-        }
+        return {"id": self.__id, "descricao": self.__descricao, "valor": self.__valor}
 
     @staticmethod
     def from_json(dic):
-        return Servico(
-            dic.get("id", 0),
-            dic.get("descricao", ""),
-            dic.get("valor", 0)
-        )
+        return Servico(dic.get("id", 0), dic.get("descricao", ""), dic.get("valor", 0))
 
     def __str__(self):
         return f"{self.__id} - {self.__descricao}"
@@ -88,9 +80,4 @@ class ServicoDAO:
     @classmethod
     def salvar(cls):
         with open("servico.json", mode="w", encoding="utf-8") as arquivo:
-            json.dump(
-                [s.to_json() for s in cls.objetos],
-                arquivo,
-                ensure_ascii=False,
-                indent=4
-            )
+            json.dump([s.to_json() for s in cls.objetos], arquivo, ensure_ascii=False, indent=4)

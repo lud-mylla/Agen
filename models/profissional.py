@@ -1,12 +1,12 @@
 import json
 
 class Profissional:
-    def __init__(self, id, nome, email, especialidade, conselho, senha):
+    def __init__(self, id, nome, email,  especialidade,conselho,senha):
         self.__id = id
         self.__nome = nome
         self.__email = email
         self.__especialidade = especialidade
-        self.__conselho = conselho
+        self.__conselho= conselho
         self.__senha = senha
 
     def get_id(self): return self.__id
@@ -19,8 +19,8 @@ class Profissional:
     def set_id(self, id): self.__id = id
     def set_nome(self, nome): self.__nome = nome
     def set_email(self, email): self.__email = email
-    def set_fone(self, especialidade): self.__especialidade = especialidade
-    def set_conselho(self, conselho): self.__conselho = conselho
+    def set_fone(self, especialidade): self.__especialidade= especialidade
+    def set_conselho(self,conselho): self.__conselho=conselho
     def set_senha(self, senha): self.__senha = senha
 
     def to_json(self):
@@ -35,17 +35,11 @@ class Profissional:
 
     @staticmethod
     def from_json(dic):
-        return Profissional(
-            dic.get("id", 0),
-            dic.get("nome", ""),
-            dic.get("email", ""),
-            dic.get("especialidade", ""),
-            dic.get("conselho", ""),
-            dic.get("senha", "")
-        )
+        return Profissional(dic.get("id", 0), dic.get("nome", ""), dic.get("email", ""), dic.get("especialidade", ""),dic.get("conselho", ""), dic.get("senha", ""))
 
     def __str__(self):
         return f"{self.__id} - {self.__nome}"
+
 
 class ProfissionalDAO:
     objetos = []
@@ -109,4 +103,3 @@ class ProfissionalDAO:
                 ensure_ascii=False,
                 indent=4
             )
-
