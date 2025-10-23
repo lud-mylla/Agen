@@ -1,4 +1,3 @@
-
 ADMIN_SENHA = "1234"
 
 from models.cliente import Cliente, ClienteDAO
@@ -9,6 +8,7 @@ from models.horario import Horario, HorarioDAO
 
 class View:
     
+   
     @staticmethod
     def cliente_inserir(nome, email, fone, senha):
         c = Cliente(0, nome, email, fone, senha)
@@ -131,7 +131,7 @@ class View:
         if h is not None:
             HorarioDAO.excluir(h)
 
-   
+    
     @staticmethod
     def admin_get():
         """Retorna os dados do admin"""
@@ -142,3 +142,24 @@ class View:
         """Atualiza a senha do admin"""
         global ADMIN_SENHA
         ADMIN_SENHA = nova_senha
+
+  
+    @staticmethod
+    def visualizar_meus_servicos(id_cliente):
+        """Retorna todos os serviços (horários) de um cliente"""
+        horarios = HorarioDAO.listar()
+        servicos_cliente = []
+
+        for h in horarios:
+            if h.get_id_cliente() == id_cliente:
+                servico = ServicoDAO.listar_id(h.get_id_servico())
+                profissional = ProfissionalDAO.listar_id(h.get_id_profissional())
+
+                servicos_cliente.append({
+                    "id": h.get_id(),
+                    "data": h.get_data(),
+                    "confirmado": h.get_confirmado(),
+                    "serviço": servico.get_descricao() if servico else "",
+                    "profissional": profissional.get_nome() if profissional else ""
+                })
+        return servicos_cliente

@@ -6,7 +6,9 @@ from templates.manterhorarioUI import ManterHorarioUI
 from templates.abrircontaUI import AbrirContaUI
 from templates.loginUI import LoginUI
 from templates.perfilclientesUI import PerfilclientesUI
-from templates.alterarsenhaUI import AlterarSenhaUI  
+from templates.alterarsenhaUI import AlterarSenhaUI
+from templates.visualizarservicoUI import visualizarservico_UI  
+
 st.set_page_config(layout="wide")
 
 
@@ -15,19 +17,22 @@ if "usuario_id" not in st.session_state:
     st.session_state["usuario_nome"] = None
     st.session_state["usuario_tipo"] = None
 
+
 def logout():
     st.session_state["usuario_id"] = None
     st.session_state["usuario_nome"] = None
     st.session_state["usuario_tipo"] = None
-    st.rerun() 
+    st.rerun()
+
 
 
 menu_visitante = ["Login", "Abrir Conta"]
-menu_cliente = ["Perfil", "Agendar Horário", "Logout"]
+menu_cliente = ["Perfil", "Agendar Horário", "Meus Serviços", "Logout"]  
 menu_profissional = ["Perfil", "Gerenciar Horários", "Logout"]
 menu_admin = ["Alterar Senha", "Clientes", "Profissionais", "Serviços", "Horários", "Logout"]
 
 tipo = st.session_state["usuario_tipo"]
+
 
 if tipo is None:
     op = st.sidebar.selectbox("Menu", menu_visitante)
@@ -36,17 +41,25 @@ if tipo is None:
     elif op == "Abrir Conta":
         AbrirContaUI.main()
 
+
 elif tipo == "cliente":
     op = st.sidebar.selectbox(f"Cliente: {st.session_state['usuario_nome']}", menu_cliente)
+
     if op == "Perfil":
         PerfilclientesUI.main()
+
     elif op == "Agendar Horário":
         ManterHorarioUI.main()
+
+    elif op == "Meus Serviços":
+        visualizarservico_UI()  
     elif op == "Logout":
         logout()
 
+
 elif tipo == "profissional":
     op = st.sidebar.selectbox(f"Profissional: {st.session_state['usuario_nome']}", menu_profissional)
+
     if op == "Perfil":
         PerfilclientesUI.main()
     elif op == "Gerenciar Horários":
