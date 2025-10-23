@@ -18,9 +18,7 @@ class ManterHorarioUI:
         with tab4:
             ManterHorarioUI.excluir()
 
-    # -------------------------------
-    # LISTAR (em formato de tabela)
-    # -------------------------------
+   
     @staticmethod
     def listar():
         horarios = View.horario_listar()
@@ -32,7 +30,6 @@ class ManterHorarioUI:
         servicos = {s.get_id(): s.get_descricao() for s in View.servico_listar()}
         profissionais = {p.get_id(): p.get_nome() for p in View.profissional_listar()}
 
-        # Monta tabela de dados
         dados = []
         for h in horarios:
             dados.append({
@@ -47,9 +44,7 @@ class ManterHorarioUI:
         df = pd.DataFrame(dados)
         st.dataframe(df, use_container_width=True)
 
-    # -------------------------------
-    # INSERIR
-    # -------------------------------
+  
     @staticmethod
     def inserir():
         clientes = View.cliente_listar()
@@ -85,9 +80,6 @@ class ManterHorarioUI:
             except ValueError:
                 st.error("Data inválida. Use o formato dd/mm/yyyy HH:MM")
 
-    # -------------------------------
-    # ATUALIZAR
-    # -------------------------------
     @staticmethod
     def atualizar():
         horarios = View.horario_listar()
@@ -157,9 +149,6 @@ class ManterHorarioUI:
             except ValueError:
                 st.error("Data inválida. Use o formato dd/mm/yyyy HH:MM")
 
-    # -------------------------------
-    # EXCLUIR
-    # -------------------------------
     @staticmethod
     def excluir():
         horarios = View.horario_listar()

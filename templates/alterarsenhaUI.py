@@ -1,5 +1,3 @@
-
-# templates/alterarsenhaUI.py
 import streamlit as st
 import time
 from view import View  
