@@ -7,8 +7,7 @@ from models.horario import Horario, HorarioDAO
 
 
 class View:
-    
-   
+
     @staticmethod
     def cliente_inserir(nome, email, fone, senha):
         c = Cliente(0, nome, email, fone, senha)
@@ -43,7 +42,6 @@ class View:
 
         return None
 
-    
     @staticmethod
     def profissional_inserir(nome, email, especialidade, conselho, senha):
         p = Profissional(0, nome, email, especialidade, conselho, senha)
@@ -98,14 +96,18 @@ class View:
         s = Servico(id, "", 0)
         ServicoDAO.excluir(s)
 
-    
+   
     @staticmethod
     def horario_inserir(data, confirmado, id_cliente, id_servico, id_profissional):
-        h = Horario(0, data)
-        h.set_confirmado(confirmado)
-        h.set_id_cliente(id_cliente)
-        h.set_id_servico(id_servico)
-        h.set_id_profissional(id_profissional)
+        """Insere um novo horário na agenda."""
+        h = Horario(
+            0,
+            data,
+            confirmado=confirmado,
+            id_cliente=id_cliente,
+            id_servico=id_servico,
+            id_profissional=id_profissional
+        )
         HorarioDAO.inserir(h)
 
     @staticmethod
@@ -115,6 +117,11 @@ class View:
     @staticmethod
     def horario_listar_id(id):
         return HorarioDAO.listar_id(id)
+
+    @staticmethod
+    def horario_listar_por_profissional(id_profissional):
+        """Retorna todos os horários de um profissional específico."""
+        return [h for h in HorarioDAO.listar() if h.get_id_profissional() == id_profissional]
 
     @staticmethod
     def horario_atualizar(id, data, confirmado, id_cliente, id_servico, id_profissional):
@@ -134,19 +141,15 @@ class View:
     
     @staticmethod
     def admin_get():
-        """Retorna os dados do admin"""
         return {"id": 0, "nome": "Administrador", "email": "admin", "senha": ADMIN_SENHA}
 
     @staticmethod
     def admin_atualizar(nova_senha):
-        """Atualiza a senha do admin"""
         global ADMIN_SENHA
         ADMIN_SENHA = nova_senha
 
-  
     @staticmethod
     def visualizar_meus_servicos(id_cliente):
-        """Retorna todos os serviços (horários) de um cliente"""
         horarios = HorarioDAO.listar()
         servicos_cliente = []
 

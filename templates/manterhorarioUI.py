@@ -1,174 +1,108 @@
-import streamlit as st
+import json
 from datetime import datetime
-import time
-import pandas as pd
-from view import View
 
-class ManterHorarioUI:
-    @staticmethod
-    def main():
-        st.header("Cadastro de Horários")
-        tab1, tab2, tab3, tab4 = st.tabs(["Listar", "Inserir", "Atualizar", "Excluir"])
-        with tab1:
-            ManterHorarioUI.listar()
-        with tab2:
-            ManterHorarioUI.inserir()
-        with tab3:
-            ManterHorarioUI.atualizar()
-        with tab4:
-            ManterHorarioUI.excluir()
+class Horario:
+    def __init__(self, id, data):
+        self.__id = id
+        self.__data = data
+        self.__confirmado = False
+        self.__id_cliente = 0
+        self.__id_servico = 0
+        self.__id_profissional = 0
 
-   
-    @staticmethod
-    def listar():
-        horarios = View.horario_listar()
-        if not horarios:
-            st.info("Nenhum horário cadastrado")
-            return
+    def __str__(self):
+        return f"{self.__id} - {self.__data.strftime('%d/%m/%Y %H:%M')} - {'Sim' if self.__confirmado else 'Não'}"
 
-        clientes = {c.get_id(): c.get_nome() for c in View.cliente_listar()}
-        servicos = {s.get_id(): s.get_descricao() for s in View.servico_listar()}
-        profissionais = {p.get_id(): p.get_nome() for p in View.profissional_listar()}
+    def get_id(self): return self.__id
+    def get_data(self): return self.__data
+    def get_confirmado(self): return self.__confirmado
+    def get_id_cliente(self): return self.__id_cliente
+    def get_id_servico(self): return self.__id_servico
+    def get_id_profissional(self): return self.__id_profissional
 
-        dados = []
-        for h in horarios:
-            dados.append({
-                "ID": h.get_id(),
-                "Data e Hora": h.get_data().strftime("%d/%m/%Y %H:%M"),
-                "Confirmado": "Sim" if h.get_confirmado() else "Não",
-                "Cliente": clientes.get(h.get_id_cliente(), "N/A"),
-                "Serviço": servicos.get(h.get_id_servico(), "N/A"),
-                "Profissional": profissionais.get(h.get_id_profissional(), "N/A")
-            })
+    def set_id(self, id): self.__id = id
+    def set_data(self, data): self.__data = data
+    def set_confirmado(self, confirmado): self.__confirmado = confirmado
+    def set_id_cliente(self, id_cliente): self.__id_cliente = id_cliente
+    def set_id_servico(self, id_servico): self.__id_servico = id_servico
+    def set_id_profissional(self, id_profissional): self.__id_profissional = id_profissional
 
-        df = pd.DataFrame(dados)
-        st.dataframe(df, use_container_width=True)
-
-  
-    @staticmethod
-    def inserir():
-        clientes = View.cliente_listar()
-        servicos = View.servico_listar()
-        profissionais = View.profissional_listar()
-
-        if not clientes or not servicos or not profissionais:
-            st.warning("É necessário ter pelo menos um cliente, um serviço e um profissional cadastrados")
-            return
-
-        st.subheader("Novo Horário")
-
-        data = st.text_input(
-            "Data e hora (dd/mm/yyyy HH:MM)",
-            datetime.now().strftime("%d/%m/%Y %H:%M"),
-            key="data_inserir"
-        )
-        confirmado = st.checkbox("Confirmado", key="confirmado_inserir")
-        cliente = st.selectbox("Cliente", clientes, format_func=lambda c: c.get_nome(), key="cliente_inserir")
-        servico = st.selectbox("Serviço", servicos, format_func=lambda s: s.get_descricao(), key="servico_inserir")
-        profissional = st.selectbox("Profissional", profissionais, format_func=lambda p: p.get_nome(), key="profissional_inserir")
-
-        if st.button("Inserir", key="btn_inserir"):
-            try:
-                data_fmt = datetime.strptime(data, "%d/%m/%Y %H:%M")
-                if cliente and servico and profissional:
-                    View.horario_inserir(data_fmt, confirmado, cliente.get_id(), servico.get_id(), profissional.get_id())
-                    st.success("Horário inserido com sucesso")
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error("Selecione cliente, serviço e profissional")
-            except ValueError:
-                st.error("Data inválida. Use o formato dd/mm/yyyy HH:MM")
+    def to_json(self):
+        return {
+            "id": self.__id,
+            "data": self.__data.strftime("%d/%m/%Y %H:%M"),
+            "confirmado": self.__confirmado,
+            "id_cliente": self.__id_cliente,
+            "id_servico": self.__id_servico,
+            "id_profissional": self.__id_profissional
+        }
 
     @staticmethod
-    def atualizar():
-        horarios = View.horario_listar()
-        if not horarios:
-            st.info("Nenhum horário cadastrado")
-            return
+    def from_json(dic):
+        data = datetime.strptime(dic["data"], "%d/%m/%Y %H:%M")
+        h = Horario(dic.get("id", 0), data)
+        h.set_confirmado(dic.get("confirmado", False))
+        h.set_id_cliente(dic.get("id_cliente", 0))
+        h.set_id_servico(dic.get("id_servico", 0))
+        h.set_id_profissional(dic.get("id_profissional", 0))
+        return h
 
-        clientes = View.cliente_listar()
-        servicos = View.servico_listar()
-        profissionais = View.profissional_listar()
+class HorarioDAO:
+    objetos = []
 
-        st.subheader("Atualizar Horário")
+    @classmethod
+    def inserir(cls, obj):
+        cls.abrir()
+        _id = max([h.get_id() for h in cls.objetos], default=0)
+        obj.set_id(_id + 1)
+        cls.objetos.append(obj)
+        cls.salvar()
 
-        op = st.selectbox(
-            "Selecione um horário",
-            horarios,
-            format_func=lambda h: f"{h.get_id()} - {h.get_data().strftime('%d/%m/%Y %H:%M')}",
-            key="select_horario_atualizar"
-        )
+    @classmethod
+    def listar(cls):
+        cls.abrir()
+        return cls.objetos
 
-        data = st.text_input(
-            "Nova data e hora (dd/mm/yyyy HH:MM)",
-            op.get_data().strftime("%d/%m/%Y %H:%M"),
-            key=f"data_{op.get_id()}"
-        )
-        confirmado = st.checkbox(
-            "Confirmado",
-            value=op.get_confirmado(),
-            key=f"confirmado_{op.get_id()}"
-        )
-        cliente = st.selectbox(
-            "Cliente",
-            clientes,
-            index=next((i for i, c in enumerate(clientes) if c.get_id() == op.get_id_cliente()), 0),
-            format_func=lambda c: c.get_nome(),
-            key=f"cliente_{op.get_id()}"
-        )
-        servico = st.selectbox(
-            "Serviço",
-            servicos,
-            index=next((i for i, s in enumerate(servicos) if s.get_id() == op.get_id_servico()), 0),
-            format_func=lambda s: s.get_descricao(),
-            key=f"servico_{op.get_id()}"
-        )
-        profissional = st.selectbox(
-            "Profissional",
-            profissionais,
-            index=next((i for i, p in enumerate(profissionais) if p.get_id() == op.get_id_profissional()), 0),
-            format_func=lambda p: p.get_nome(),
-            key=f"profissional_{op.get_id()}"
-        )
+    @classmethod
+    def listar_id(cls, id):
+        cls.abrir()
+        for obj in cls.objetos:
+            if obj.get_id() == id:
+                return obj
+        return None
 
-        if st.button("Atualizar", key=f"btn_atualizar_{op.get_id()}"):
-            try:
-                data_fmt = datetime.strptime(data, "%d/%m/%Y %H:%M")
-                View.horario_atualizar(
-                    op.get_id(),
-                    data_fmt,
-                    confirmado,
-                    cliente.get_id(),
-                    servico.get_id(),
-                    profissional.get_id()
-                )
-                st.success("Horário atualizado com sucesso")
-                time.sleep(1)
-                st.rerun()
-            except ValueError:
-                st.error("Data inválida. Use o formato dd/mm/yyyy HH:MM")
+    @classmethod
+    def atualizar(cls, obj):
+        cls.abrir()
+        for h in cls.objetos:
+            if h.get_id() == obj.get_id():
+                cls.objetos.remove(h)
+                cls.objetos.append(obj)
+                cls.salvar()
+                return
 
-    @staticmethod
-    def excluir():
-        horarios = View.horario_listar()
-        if not horarios:
-            st.info("Nenhum horário cadastrado")
-            return
+    @classmethod
+    def excluir(cls, obj):
+        cls.abrir()
+        for h in cls.objetos:
+            if h.get_id() == obj.get_id():
+                cls.objetos.remove(h)
+                cls.salvar()
+                return
 
-        st.subheader("Excluir Horário")
+    @classmethod
+    def abrir(cls):
+        cls.objetos = []
+        try:
+            with open("horarios.json", mode="r", encoding="utf-8") as arquivo:
+                lista = json.load(arquivo)
+                for dic in lista:
+                    cls.objetos.append(Horario.from_json(dic))
+        except FileNotFoundError:
+            with open("horarios.json", mode="w", encoding="utf-8") as arquivo:
+                json.dump([], arquivo)
 
-        op = st.selectbox(
-            "Selecione um horário para excluir",
-            horarios,
-            format_func=lambda h: f"{h.get_id()} - {h.get_data().strftime('%d/%m/%Y %H:%M')}",
-            key="select_excluir"
-        )
-
-        if st.button("Excluir", key=f"btn_excluir_{op.get_id()}"):
-            View.horario_excluir(op.get_id())
-            st.success("Horário excluído com sucesso")
-            time.sleep(1)
-            st.rerun()
-
-
+    @classmethod
+    def salvar(cls):
+        with open("horarios.json", mode="w", encoding="utf-8") as arquivo:
+            json.dump([h.to_json() for h in cls.objetos], arquivo, ensure_ascii=False, indent=4)

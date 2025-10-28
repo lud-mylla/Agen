@@ -1,35 +1,30 @@
+
 import streamlit as st
-import time
-from view import View  
+from view import View
 
 class AlterarSenhaUI:
-
     @staticmethod
     def main():
-        st.header("Alterar Senha")
+        st.header("Alterar Senha (Admin)")
 
-     
-        try:
-            admin = View.admin_get()
-        except AttributeError:
-            st.error("O método admin_get() não foi encontrado na View. Atualize a View.")
+        if "usuario_id" not in st.session_state or st.session_state.get("usuario_tipo") != "admin":
+            st.info("Apenas o admin pode acessar esta página.")
             return
 
-        
-        st.text_input("Nome", value=admin["nome"], disabled=True)
+        atual = st.text_input("Senha atual", type="password")
+        nova = st.text_input("Nova senha", type="password")
+        repete = st.text_input("Repita a nova senha", type="password")
 
-        st.text_input("Email", value=admin["email"], disabled=True)
-
-       
-        senha_alterada = st.text_input("Digite a nova senha", type="password")
-
-     
-        if st.button("Alterar Senha"):
-            if not senha_alterada.strip():
-                st.error("Digite uma senha válida.")
-            else:
-             
-                View.admin_atualizar(senha_alterada)
-                st.success("Senha alterada!")
-                time.sleep(2)
-                st.rerun() 
+        if st.button("Alterar senha"):
+            admin = View.admin_get()
+            if atual != admin["senha"]:
+                st.error("Senha atual inválida.")
+                return
+            if nova.strip() == "":
+                st.error("Senha nova não pode ser vazia.")
+                return
+            if nova != repete:
+                st.error("As senhas não conferem.")
+                return
+            View.admin_atualizar(nova)
+            st.success("Senha do admin atualizada com sucesso.")
