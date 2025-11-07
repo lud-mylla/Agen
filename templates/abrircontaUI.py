@@ -2,7 +2,6 @@ import streamlit as st
 from view import View
 import time
 
-
 class AbrirContaUI:
     @staticmethod
     def main():
@@ -14,7 +13,10 @@ class AbrirContaUI:
         senha = st.text_input("Informe a senha", type="password")
 
         if st.button("Inserir"):
-            View.cliente_inserir(nome, email, fone, senha)
-            st.success("Conta criada com sucesso")
-            time.sleep(1)
-            st.rerun()
+            try:
+                View.cliente_inserir(nome, email, fone, senha)
+                st.success("Conta criada com sucesso!")
+                time.sleep(1)
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erro: {e}")

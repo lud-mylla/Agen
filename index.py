@@ -8,6 +8,8 @@ from templates.loginUI import LoginUI
 from templates.perfilclientesUI import PerfilclientesUI
 from templates.alterarsenhaUI import AlterarSenhaUI
 from templates.abriragendaUI import AbrirAgendaUI 
+from templates.confirmarservicoUI import ConfirmarServicoUI
+from templates.meusservicosUI import MeusServicosUI
 
 st.set_page_config(layout="wide")
 
@@ -16,7 +18,6 @@ if "usuario_id" not in st.session_state:
     st.session_state["usuario_id"] = None
     st.session_state["usuario_nome"] = None
     st.session_state["usuario_tipo"] = None
-
 
 def logout():
     """Realiza logout do usuário."""
@@ -43,32 +44,27 @@ if tipo is None:
 
 elif tipo == "cliente":
     op = st.sidebar.selectbox(f"Cliente: {st.session_state['usuario_nome']}", menu_cliente)
-
     if op == "Perfil":
         PerfilclientesUI.main()
     elif op == "Agendar Horário":
         AbrirAgendaUI.main()  
     elif op == "Meus Serviços":
-        visualizarservico_UI()
+        MeusServicosUI.main()  
     elif op == "Logout":
         logout()
 
 
-
 elif tipo == "profissional":
     op = st.sidebar.selectbox(f"Profissional: {st.session_state['usuario_nome']}", menu_profissional)
-
     if op == "Perfil":
         PerfilclientesUI.main()
     elif op == "Gerenciar Horários":
        AbrirAgendaUI.main() 
     elif op == "Logout":
         logout()
-
-
+ 
 elif tipo == "admin":
     op = st.sidebar.selectbox(f"Admin: {st.session_state['usuario_nome']}", menu_admin)
-
     if op == "Alterar Senha":
         AlterarSenhaUI.main()
     elif op == "Clientes":

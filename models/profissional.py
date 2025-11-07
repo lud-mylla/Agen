@@ -1,12 +1,19 @@
 import json
 
 class Profissional:
-    def __init__(self, id, nome, email,  especialidade,conselho,senha):
+    def __init__(self, id, nome, email, especialidade, conselho, senha):
+        if not nome.strip():
+            raise ValueError("O nome do profissional não pode ser vazio.")
+        if not email.strip():
+            raise ValueError("O e-mail do profissional não pode ser vazio.")
+        if not senha.strip():
+            raise ValueError("A senha do profissional não pode ser vazia.")
+
         self.__id = id
         self.__nome = nome
         self.__email = email
         self.__especialidade = especialidade
-        self.__conselho= conselho
+        self.__conselho = conselho
         self.__senha = senha
 
     def get_id(self): return self.__id
@@ -17,11 +24,27 @@ class Profissional:
     def get_senha(self): return self.__senha
 
     def set_id(self, id): self.__id = id
-    def set_nome(self, nome): self.__nome = nome
-    def set_email(self, email): self.__email = email
-    def set_fone(self, especialidade): self.__especialidade= especialidade
-    def set_conselho(self,conselho): self.__conselho=conselho
-    def set_senha(self, senha): self.__senha = senha
+
+    def set_nome(self, nome):
+        if not nome.strip():
+            raise ValueError("O nome não pode ser vazio.")
+        self.__nome = nome
+
+    def set_email(self, email):
+        if not email.strip():
+            raise ValueError("O e-mail não pode ser vazio.")
+        self.__email = email
+
+    def set_especialidade(self, especialidade):
+        self.__especialidade = especialidade
+
+    def set_conselho(self, conselho):
+        self.__conselho = conselho
+
+    def set_senha(self, senha):
+        if not senha.strip():
+            raise ValueError("A senha não pode ser vazia.")
+        self.__senha = senha
 
     def to_json(self):
         return {
@@ -35,7 +58,14 @@ class Profissional:
 
     @staticmethod
     def from_json(dic):
-        return Profissional(dic.get("id", 0), dic.get("nome", ""), dic.get("email", ""), dic.get("especialidade", ""),dic.get("conselho", ""), dic.get("senha", ""))
+        return Profissional(
+            dic.get("id", 0),
+            dic.get("nome", ""),
+            dic.get("email", ""),
+            dic.get("especialidade", ""),
+            dic.get("conselho", ""),
+            dic.get("senha", "")
+        )
 
     def __str__(self):
         return f"{self.__id} - {self.__nome}"
@@ -47,10 +77,7 @@ class ProfissionalDAO:
     @classmethod
     def inserir(cls, obj):
         cls.abrir()
-        _id = 0
-        for aux in cls.objetos:
-            if aux.get_id() > _id:
-                _id = aux.get_id()
+        _id = max([p.get_id() for p in cls.objetos], default=0)
         obj.set_id(_id + 1)
         cls.objetos.append(obj)
         cls.salvar()
@@ -71,7 +98,7 @@ class ProfissionalDAO:
     @classmethod
     def atualizar(cls, obj):
         aux = cls.listar_id(obj.get_id())
-        if aux is not None:
+        if aux:
             cls.objetos.remove(aux)
             cls.objetos.append(obj)
             cls.salvar()
@@ -79,7 +106,7 @@ class ProfissionalDAO:
     @classmethod
     def excluir(cls, obj):
         aux = cls.listar_id(obj.get_id())
-        if aux is not None:
+        if aux:
             cls.objetos.remove(aux)
             cls.salvar()
 
@@ -87,8 +114,8 @@ class ProfissionalDAO:
     def abrir(cls):
         cls.objetos = []
         try:
-            with open("profissional.json", mode="r", encoding="utf-8") as arquivo:
-                lista = json.load(arquivo)
+            with open("profissional.json", "r", encoding="utf-8") as arq:
+                lista = json.load(arq)
                 for dic in lista:
                     cls.objetos.append(Profissional.from_json(dic))
         except FileNotFoundError:
@@ -96,10 +123,5 @@ class ProfissionalDAO:
 
     @classmethod
     def salvar(cls):
-        with open("profissional.json", mode="w", encoding="utf-8") as arquivo:
-            json.dump(
-                [p.to_json() for p in cls.objetos],
-                arquivo,
-                ensure_ascii=False,
-                indent=4
-            )
+        with open("profissional.json", "w", encoding="utf-8") as arq:
+            json.dump([p.to_json() for p in cls.objetos], arq, ensure_ascii=False, indent=4)

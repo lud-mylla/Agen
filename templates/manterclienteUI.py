@@ -1,76 +1,127 @@
-import streamlit as st
-import pandas as pd
-import time
-from view import View
+import json
 
+class Cliente:
+    def __init__(self, id, nome, email, fone, senha):
+      
+        if not nome.strip():
+            raise ValueError("O nome do cliente não pode ser vazio.")
+        if not email.strip():
+            raise ValueError("O e-mail do cliente não pode ser vazio.")
+        if not senha.strip():
+            raise ValueError("A senha do cliente não pode ser vazia.")
 
-class ManterClienteUI:
-    @staticmethod
-    def main():
-        st.header("Cadastro de Clientes")
+        self.__id = id
+        self.__nome = nome
+        self.__email = email
+        self.__fone = fone
+        self.__senha = senha
 
-        tab1, tab2, tab3, tab4 = st.tabs(["Listar", "Inserir", "Atualizar", "Excluir"])
+    def get_id(self): return self.__id
+    def get_nome(self): return self.__nome
+    def get_email(self): return self.__email
+    def get_fone(self): return self.__fone
+    def get_senha(self): return self.__senha
 
-        with tab1:
-            ManterClienteUI.listar()
-        with tab2:
-            ManterClienteUI.inserir()
-        with tab3:
-            ManterClienteUI.atualizar()
-        with tab4:
-            ManterClienteUI.excluir()
+    
+    def set_id(self, id): self.__id = id
 
-    @staticmethod
-    def listar():
-        clientes = View.cliente_listar()
-        if not clientes:
-            st.info("Nenhum cliente cadastrado")
-            return
+    def set_nome(self, nome):
+        if not nome.strip():
+            raise ValueError("O nome não pode ser vazio.")
+        self.__nome = nome
 
-        df = pd.DataFrame([c.to_json() for c in clientes])
-        st.dataframe(df)
+    def set_email(self, email):
+        if not email.strip():
+            raise ValueError("O e-mail não pode ser vazio.")
+        self.__email = email
 
-    @staticmethod
-    def inserir():
-        nome = st.text_input("Informe o nome")
-        email = st.text_input("Informe o e-mail")
-        fone = st.text_input("Informe o fone")
-        senha = st.text_input("Informe a senha", type="password")
+    def set_fone(self, fone):
+        self.__fone = fone
 
-        if st.button("Inserir"):
-            View.cliente_inserir(nome, email, fone, senha)
-            st.success("Cliente inserido com sucesso")
-            time.sleep(1)
-            st.rerun()
+    def set_senha(self, senha):
+        if not senha.strip():
+            raise ValueError("A senha não pode ser vazia.")
+        self.__senha = senha
 
-    @staticmethod
-    def atualizar():
-        clientes = View.cliente_listar()
-        if not clientes:
-            st.info("Nenhum cliente cadastrado")
-            return
-
-        op = st.selectbox("Selecione um cliente", clientes, format_func=lambda c: c.get_nome())
-        nome = st.text_input("Novo nome", op.get_nome())
-        email = st.text_input("Novo e-mail", op.get_email())
-        fone = st.text_input("Novo fone", op.get_fone())
-        senha = st.text_input("Nova senha", op.get_senha(), type="password")
-
-        if st.button("Atualizar"):
-            View.cliente_atualizar(op.get_id(), nome, email, fone, senha)
-            st.success("Cliente atualizado com sucesso")
+    def to_json(self):
+        return {
+            "id": self.__id,
+            "nome": self.__nome,
+            "email": self.__email,
+            "fone": self.__fone,
+            "senha": self.__senha
+        }
 
     @staticmethod
-    def excluir():
-        clientes = View.cliente_listar()
-        if not clientes:
-            st.info("Nenhum cliente cadastrado")
-            return
+    def from_json(dic):
+        return Cliente(
+            dic.get("id", 0),
+            dic.get("nome", ""),
+            dic.get("email", ""),
+            dic.get("fone", ""),
+            dic.get("senha", "")
+        )
 
-        op = st.selectbox("Selecione um cliente para excluir", clientes, format_func=lambda c: c.get_nome())
+    def __str__(self):
+        return f"{self.__id} - {self.__nome}"
 
-        if st.button("Excluir"):
-            View.cliente_excluir(op.get_id())
-            st.success("Cliente excluído com sucesso")
-            time.sleep(1)
-            st.rerun()
+
+class ClienteDAO:
+    objetos = []
+
+    @classmethod
+    def inserir(cls, obj):
+        cls.abrir()
+        _id = max([c.get_id() for c in cls.objetos], default=0)
+        obj.set_id(_id + 1)
+        cls.objetos.append(obj)
+        cls.salvar()
+
+    @classmethod
+    def listar(cls):
+        cls.abrir()
+        return cls.objetos
+
+    @classmethod
+    def listar_id(cls, id):
+        cls.abrir()
+        for obj in cls.objetos:
+            if obj.get_id() == id:
+                return obj
+        return None
+
+    @classmethod
+    def atualizar(cls, obj):
+        aux = cls.listar_id(obj.get_id())
+        if aux:
+            cls.objetos.remove(aux)
+            cls.objetos.append(obj)
+            cls.salvar()
+
+    @classmethod
+    def excluir(cls, obj):
+        aux = cls.listar_id(obj.get_id())
+        if aux:
+            cls.objetos.remove(aux)
+            cls.salvar()
+
+    @classmethod
+    def abrir(cls):
+        cls.objetos = []
+        try:
+            with open("clientes.json", "r", encoding="utf-8") as arq:
+                lista = json.load(arq)
+                for dic in lista:
+                    cls.objetos.append(Cliente.from_json(dic))
+        except FileNotFoundError:
+            pass
+
+    @classmethod
+    def salvar(cls):
+        with open("clientes.json", "w", encoding="utf-8") as arq:
+            json.dump(
+                [c.to_json() for c in cls.objetos],
+                arq,
+                ensure_ascii=False,
+                indent=4
+            )
