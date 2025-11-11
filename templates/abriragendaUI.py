@@ -48,3 +48,27 @@ class AbrirAgendaUI:
                 dt_inicial += timedelta(minutes=intervalo)
 
             st.success(f"{horarios_criados} horários inseridos na agenda com sucesso!")
+            if dt_inicial >= dt_final:
+                st.error("A hora inicial deve ser menor que a hora final.")
+                return
+
+            horarios_criados = 0
+
+            try:
+                while dt_inicial < dt_final:
+                    View.horario_inserir(
+                        dt_inicial,
+                        False,  # confirmado
+                        0,      # id_cliente
+                        servico.get_id(),
+                        profissional_id
+                    )
+                    horarios_criados += 1
+                    dt_inicial += timedelta(minutes=intervalo)
+
+                st.success(f"{horarios_criados} horários inseridos com sucesso!")
+
+            except ValueError as e:
+                st.error(f"Erro ao inserir horários: {e}")
+            except Exception as e:
+                st.error(f"Ocorreu um erro inesperado: {e}")
