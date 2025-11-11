@@ -151,6 +151,9 @@ class View:
     
     @staticmethod
     def horario_inserir(data, confirmado, id_cliente, id_servico, id_profissional):
+        for h in HorarioDAO.listar():
+            if h.get_id_profissional() == id_profissional and h.get_data() == data:
+                raise ValueError("Já existe um horário cadastrado com essa data e hora para este profissional")
         h = Horario(0, data)
         h.set_confirmado(confirmado)
         h.set_id_cliente(id_cliente)
@@ -161,12 +164,38 @@ class View:
     @staticmethod
     def horario_listar():
         return HorarioDAO.listar() or []
+    
+
+    @staticmethod
+    def horario_atualizar(id, data, confirmado, id_cliente, id_servico, id_profissional):
+        # Validação 1 também no atualizar
+        for h in HorarioDAO.listar():
+            if (
+                h.get_id_profissional() == id_profissional
+                and h.get_data() == data
+                and h.get_id() != id
+            ):
+                raise ValueError("Já existe outro horário com essa data e hora para este profissional.")
+            
+        h = Horario(id, data)
+        h.set_confirmado(confirmado)
+        h.set_id_cliente(id_cliente)
+        h.set_id_servico(id_servico)
+        h.set_id_profissional(id_profissional)
+        HorarioDAO.atualizar(h)
+
+
 
     @staticmethod
     def horario_excluir(id):
         h = HorarioDAO.listar_id(id)
-        if h:
-            HorarioDAO.excluir(h)
+        if not h:
+            return
+        if h.get_id_cliente() is not None and h.get_id_cliente() != 0:
+            raise ValueError("Não é posível escluir um horário que ja foi agendado por um cliente")
+        
+
+        HorarioDAO.excluir(h)
 
     @staticmethod
     def admin_get():
@@ -180,3 +209,4 @@ class View:
     def admin_atualizar(nova_senha):
         with open("admin.json", "w", encoding="utf-8") as arq:
             json.dump({"senha": nova_senha}, arq, ensure_ascii=False, indent=4)
+            
