@@ -62,7 +62,19 @@ class ManterProfissionalUI:
         senha = st.text_input("Senha", op.get_senha(), type="password")
 
         if st.button("Atualizar"):
-                 try:
+                try:
+                    View.profissional_atualizar(op.get_id(), nome, email, especialidade, conselho, senha)
+                    st.success("Profissional atualizado com sucesso")
+                    time.sleep(1)
+                    st.rerun()
+                except ValueError as e:
+                    st.warning(f'{e}')
+                except Exception as e:
+                    st.error(f'Erro inesperado ao atualizar profissional: {e}')
+
+                except Exception as e:
+                    st.error(f'Erro ao carregar dados dos profissionais: {e}')
+                     
            
 
     @staticmethod
@@ -80,5 +92,9 @@ class ManterProfissionalUI:
                 st.success("Profissional excluído com sucesso!")
                 time.sleep(1)
                 st.rerun()
+            except ValueError as e:
+                    st.warning(f'{e}')
             except Exception as e:
-                st.error(f"Erro: {e}")
+                    st.error(f'Erro inesperado ao excluir profissional: {e}')
+            except Exception as e:
+                   st.error(f'Erro ao carregar profissionais: {e}')
