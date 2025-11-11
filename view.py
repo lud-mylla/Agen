@@ -11,7 +11,6 @@ class View:
         if email.lower() == "admin":
             raise ValueError("O e-mail 'admin' é reservado ao administrador.")
 
-        
         for c in ClienteDAO.listar():
             if c.get_email().lower() == email.lower():
                 raise ValueError("Já existe um cliente com este e-mail.")
@@ -47,7 +46,6 @@ class View:
 
     @staticmethod
     def cliente_excluir(id):
-     
         for h in HorarioDAO.listar():
             if h.get_id_cliente() == id:
                 raise ValueError("Não é possível excluir um cliente com horários agendados.")
@@ -62,9 +60,22 @@ class View:
                 return {"id": c.get_id(), "nome": c.get_nome(), "tipo": "cliente"}
         return None
 
-    
     @staticmethod
     def profissional_inserir(nome, email, especialidade, conselho, senha):
+       
+        if not nome.strip() or not email.strip() or not senha.strip():
+            raise ValueError("Nome, e-mail e senha são obrigatórios.")
+        
+        if email.lower() == "admin":
+            raise ValueError("O e-mail 'admin' é reservado ao administrador.")
+
+        for p in ProfissionalDAO.listar():
+            if p.get_email().lower() == email.lower():
+                raise ValueError("Já existe um profissional com este e-mail.")
+        for c in ClienteDAO.listar():
+            if c.get_email().lower() == email.lower():
+                raise ValueError("Já existe um cliente com este e-mail.")
+
         p = Profissional(0, nome, email, especialidade, conselho, senha)
         ProfissionalDAO.inserir(p)
 
@@ -78,11 +89,30 @@ class View:
 
     @staticmethod
     def profissional_atualizar(id, nome, email, especialidade, conselho, senha):
+       
+        if not nome.strip() or not email.strip() or not senha.strip():
+            raise ValueError("Nome, e-mail e senha são obrigatórios.")
+
+        if email.lower() == "admin":
+            raise ValueError("O e-mail 'admin' é reservado ao administrador.")
+
+        for p in ProfissionalDAO.listar():
+            if p.get_email().lower() == email.lower() and p.get_id() != id:
+                raise ValueError("Já existe outro profissional com este e-mail.")
+        for c in ClienteDAO.listar():
+            if c.get_email().lower() == email.lower():
+                raise ValueError("Já existe um cliente com este e-mail.")
+
         p = Profissional(id, nome, email, especialidade, conselho, senha)
         ProfissionalDAO.atualizar(p)
 
     @staticmethod
     def profissional_excluir(id):
+        
+        for h in HorarioDAO.listar():
+            if h.get_id_profissional() == id:
+                raise ValueError("Não é possível excluir um profissional com horários cadastrados.")
+
         p = ProfissionalDAO.listar_id(id)
         if p:
             ProfissionalDAO.excluir(p)
@@ -137,7 +167,6 @@ class View:
         h = HorarioDAO.listar_id(id)
         if h:
             HorarioDAO.excluir(h)
-
 
     @staticmethod
     def admin_get():

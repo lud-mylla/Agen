@@ -16,12 +16,15 @@ class ManterProfissionalUI:
 
     @staticmethod
     def listar():
-        profissionais = View.profissional_listar()
-        if not profissionais:
-            st.info("Nenhum profissional cadastrado.")
-            return
-        df = pd.DataFrame([p.to_json() for p in profissionais])
-        st.dataframe(df)
+        try:
+           profissionais = View.profissional_listar()
+           if not profissionais:
+               st.info("Nenhum profissional cadastrado.")
+               return
+           df = pd.DataFrame([p.to_json() for p in profissionais])
+           st.dataframe(df)
+        except Exception as e:
+            st.error(f'erro ao listar profissonais: {e}')
 
     @staticmethod
     def inserir():
@@ -32,13 +35,17 @@ class ManterProfissionalUI:
         senha = st.text_input("Senha", type="password")
 
         if st.button("Inserir"):
+
             try:
                 View.profissional_inserir(nome, email, especialidade, conselho, senha)
                 st.success("Profissional inserido com sucesso!")
                 time.sleep(1)
                 st.rerun()
+            except ValueError as e:
+                st.warning(f'{e}')
             except Exception as e:
-                st.error(f"Erro: {e}")
+                st.error(f'Erro inesperado ao inserir profissional: {e}')
+
 
     @staticmethod
     def atualizar():
@@ -55,13 +62,8 @@ class ManterProfissionalUI:
         senha = st.text_input("Senha", op.get_senha(), type="password")
 
         if st.button("Atualizar"):
-            try:
-                View.profissional_atualizar(op.get_id(), nome, email, especialidade, conselho, senha)
-                st.success("Profissional atualizado com sucesso!")
-                time.sleep(1)
-                st.rerun()
-            except Exception as e:
-                st.error(f"Erro: {e}")
+                 try:
+           
 
     @staticmethod
     def excluir():

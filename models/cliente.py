@@ -1,42 +1,46 @@
 import json
 
-
 class Cliente:
     def __init__(self, id, nome, email, fone, senha):
+      
+        if not nome.strip():
+            raise ValueError("O nome do cliente não pode ser vazio.")
+        if not email.strip():
+            raise ValueError("O e-mail do cliente não pode ser vazio.")
+        if not senha.strip():
+            raise ValueError("A senha do cliente não pode ser vazia.")
+
         self.__id = id
         self.__nome = nome
         self.__email = email
         self.__fone = fone
         self.__senha = senha
 
-    def get_id(self):
-        return self.__id
+    def get_id(self): return self.__id
+    def get_nome(self): return self.__nome
+    def get_email(self): return self.__email
+    def get_fone(self): return self.__fone
+    def get_senha(self): return self.__senha
 
-    def get_nome(self):
-        return self.__nome
-
-    def get_email(self):
-        return self.__email
-
-    def get_fone(self):
-        return self.__fone
-
-    def get_senha(self):
-        return self.__senha
-
-    def set_id(self, id):
-        self.__id = id
+    
+    def set_id(self, id): self.__id = id
 
     def set_nome(self, nome):
+        if not nome.strip():
+            raise ValueError("O nome não pode ser vazio.")
         self.__nome = nome
 
     def set_email(self, email):
+        if not email.strip():
+            raise ValueError("O e-mail não pode ser vazio.")
         self.__email = email
 
     def set_fone(self, fone):
         self.__fone = fone
 
     def set_senha(self, senha):
+        if not senha.strip():
+            raise ValueError("A senha não pode ser vazia.")
         self.__senha = senha
 
     def to_json(self):
@@ -47,7 +51,6 @@ class Cliente:
             "fone": self.__fone,
             "senha": self.__senha
         }
-
 
     @staticmethod
     def from_json(dic):
@@ -69,10 +72,7 @@ class ClienteDAO:
     @classmethod
     def inserir(cls, obj):
         cls.abrir()
-        _id = 0
-        for aux in cls.objetos:
-            if aux.get_id() > _id:
-                _id = aux.get_id()
+        _id = max([c.get_id() for c in cls.objetos], default=0)
         obj.set_id(_id + 1)
         cls.objetos.append(obj)
         cls.salvar()
@@ -93,7 +93,7 @@ class ClienteDAO:
     @classmethod
     def atualizar(cls, obj):
         aux = cls.listar_id(obj.get_id())
-        if aux is not None:
+        if aux:
             cls.objetos.remove(aux)
             cls.objetos.append(obj)
             cls.salvar()
@@ -101,7 +101,7 @@ class ClienteDAO:
     @classmethod
     def excluir(cls, obj):
         aux = cls.listar_id(obj.get_id())
-        if aux is not None:
+        if aux:
             cls.objetos.remove(aux)
             cls.salvar()
 
@@ -109,8 +109,8 @@ class ClienteDAO:
     def abrir(cls):
         cls.objetos = []
         try:
-            with open("clientes.json", mode="r", encoding="utf-8") as arquivo:
-                lista = json.load(arquivo)
+            with open("clientes.json", "r", encoding="utf-8") as arq:
+                lista = json.load(arq)
                 for dic in lista:
                     cls.objetos.append(Cliente.from_json(dic))
         except FileNotFoundError:
@@ -118,10 +118,10 @@ class ClienteDAO:
 
     @classmethod
     def salvar(cls):
-        with open("clientes.json", mode="w", encoding="utf-8") as arquivo:
+        with open("clientes.json", "w", encoding="utf-8") as arq:
             json.dump(
                 [c.to_json() for c in cls.objetos],
-                arquivo,
+                arq,
                 ensure_ascii=False,
                 indent=4
             )
